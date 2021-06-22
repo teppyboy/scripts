@@ -1,40 +1,27 @@
 #!/bin/bash
 
-NPL_WIN_DL='https://github.com/shusaura85/notparadoxlauncher/releases/download/v1.3.1/Windows.Not.Paradox.Launcher.v1.3.1.x64.zip'
-
-echo "NotParadoxLauncher for Cities: Skylines (Windows version running in Proton)"
+echo "Cities: Skylines no launcher patch (dowser.exe replacing method)"
 echo "Type your Cities:Skylines location (default is $HOME/.local/share/Steam/steamapps/common/Cities_Skylines/):"
 read CS_LOCATION
 [ -z "$CS_LOCATION" ] && CS_LOCATION="$HOME/.local/share/Steam/steamapps/common/Cities_Skylines/"
-echo "Changing directory to Cities: Skylines..."
+echo "Changing directory..."
 cd "$CS_LOCATION"
-rm -rf NPX_WIN.zip
-rm -rf NotParadoxLauncher
-echo "Downloading NotParadoxLauncher (Windows version)..."
-wget -O NPX_WIN.zip "$NPL_WIN_DL"
-echo "Extracting NotParadoxLauncher..."
-mkdir -p ./NotParadoxLauncher
-unzip ./NPX_WIN.zip -d NotParadoxLauncher
-rm -rf NPX_WIN.zip
-echo "Detecting installed Proton..."
-PROTONS=()
+PROTON6=false
 for steam_apps in ./../*/; do
-    if [[ $steam_apps == *"Proton"* ]];then
-        echo "Found Proton: $steam_apps"
-        PROTONS+=("$steam_apps")
+    if [[ $steam_apps == *"Proton 6"* || $steam_apps == *"Proton - Experimental"* ]]; then
+        PROTON6=true
+        break
     fi
 done
-echo "Available Proton:"
-for idx in ${!PROTONS[@]}; do
-    echo "[$idx]: ${PROTONS[idx]}"
-done
-echo "Select: "
-read PROTON_SEL_INT
-PROTON_SEL_slash=${PROTONS[PROTON_SEL_INT]}
-PROTON_SEL=${PROTON_SEL_slash%?}
-echo "Selected $PROTON_SEL, processing..."
-echo "Creating NotParadoxLauncher script..."
-PREFIXPATH=$(realpath "./../../compatdata/255710/pfx")
-echo "WINEPREFIX=\"$PREFIXPATH\" \"$PROTON_SEL/files/bin/wine\" ./NotParadoxLauncher/bootstrapper-v2.exe" > launcher.sh
-chmod +x launcher.sh
-echo "Done! You can launch NotParadoxLauncher by doing './launcher.sh' in Cities: Skylines dir."
+if [[ $PROTON6 == false ]]; then
+    echo "Proton 6/Proton - Experimental not found!"
+    echo "Make sure you installed Proton 6+ for the game to launch properly."
+    exit 1
+fi
+echo "Patching dowser.exe --> Cities.exe"
+mv dowser.exe dowser.exe.bak
+ln -sf Cities.exe dowser.exe
+ln -sf Cities_Data dowser_Data 
+echo "Done! You can now launch the game in Steam."
+xdg-open https://www.youtube.com/watch?v=dQw4w9WgXcQ
+neofetch
