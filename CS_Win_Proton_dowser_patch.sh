@@ -1,0 +1,1 @@
+echo "Changing Directory..." && cd ~/.local/share/Steam/steamapps/common/Cities_Skylines/ && echo "Patching dowser.exe --> Cities.exe" && mv dowser.exe dowser.exe.bak && ln -sf Cities.exe dowser.exe && ln -sf Cities_Data dowser_Data && echo "Done! You can now launch the game in Steam." && xdg-open https://www.youtube.com/watch?v=dQw4w9WgXcQ && neofetch
