@@ -15,6 +15,7 @@ wget -O NPX_WIN.zip "$NPL_WIN_DL"
 echo "Extracting NotParadoxLauncher..."
 mkdir -p ./NotParadoxLauncher
 unzip ./NPX_WIN.zip -d NotParadoxLauncher
+rm -rf NPX_WIN.zip
 echo "Detecting installed Proton..."
 PROTONS=()
 for steam_apps in ./../*/; do
