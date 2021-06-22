@@ -29,10 +29,11 @@ for idx in ${!PROTONS[@]}; do
 done
 echo "Select: "
 read PROTON_SEL_INT
-PROTON_SEL=${{PROTONS[PROTON_SEL_INT]}%?}
+PROTON_SEL_slash=${PROTONS[PROTON_SEL_INT]}
+PROTON_SEL=${PROTON_SEL_slash%?}
 echo "Selected $PROTON_SEL, processing..."
 echo "Creating NotParadoxLauncher script..."
-echo "WINEPREFIX='./../../compatdata/255710/pfx' $PROTON_SEL/files/bin/wine ./NotParadoxLauncher/bootstrapper-v2.exe" > launcher.sh
+PREFIXPATH=$(realpath "./../../compatdata/255710/pfx")
+echo "WINEPREFIX=\"$PREFIXPATH\" \"$PROTON_SEL/files/bin/wine\" ./NotParadoxLauncher/bootstrapper-v2.exe" > launcher.sh
 chmod +x launcher.sh
 echo "Done! You can launch NotParadoxLauncher by doing './launcher.sh' in Cities: Skylines dir."
-EOF
