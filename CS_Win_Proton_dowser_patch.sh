@@ -9,7 +9,6 @@ cd "$CS_LOCATION"
 PROTON6=false
 for steam_apps in ./../*/; do
     if [[ $steam_apps == *"Proton 6"* || $steam_apps == *"Proton - Experimental"* ]]; then
-        echo "debug"
         PROTON6=true
         break
     fi
