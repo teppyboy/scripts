@@ -16,7 +16,13 @@ done
 if [[ $PROTON6 == false ]]; then
     echo "Proton 6/Proton - Experimental not found!"
     echo "Make sure you installed Proton 6+ for the game to launch properly."
-    exit 1
+    echo "Proton 5 may work for Intel, but not for NVIDIA (it hang)"
+    read -p "Do you want to proceed? [Y/n] " -n 1 -r
+    echo
+    if ! [[ $REPLY =~ ^[Yy]$ ]]
+    then
+        exit 1
+    fi
 fi
 echo "Patching dowser.exe --> Cities.exe"
 mv dowser.exe dowser.exe.bak
