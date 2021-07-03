@@ -53,7 +53,15 @@ await fetch("https://code.jquery.com/jquery-3.6.0.min.js").then(x => x.text()).t
     }
     // Click the spin button
     function spin() {
-        clickFirstButtonByClassName("wheel__main--note")
+        if (document.getElementsByClassName("popup-draw__card").length > 0) {
+            let teams = document.getElementsByClassName("popup-draw__card")
+            for (let i = 0; i < 3; i++) {
+                teams[i].dispatchEvent(new MouseEvent("click"));
+            }
+        }
+        else {
+            clickFirstButtonByClassName("wheel__main--note")
+        }
     }
     // Close the dialog
     function closeSwal2() {
