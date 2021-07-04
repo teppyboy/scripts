@@ -64,6 +64,7 @@
                 // Spin
                 clickFirstButtonByClassName("wheel__main--note")
                 clickFirstButtonByClassName("chest")
+                document.getElementsByClassName("widget2").dispatchEvent(new MouseEvent("click"));
             }
         }
         // Close the dialog
