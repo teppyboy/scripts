@@ -1,7 +1,17 @@
 (async function() {
     // Fetch jQuery
-    await fetch("https://code.jquery.com/jquery-3.6.0.min.js").then(x => x.text()).then(y => eval(y))
-    setTimeout(() => { $("window").off("mouseup") }, 1000)
+    let jquery = await fetch("https://code.jquery.com/jquery-3.6.0.min.js").then(x => x.text()).then(y => eval(y))
+    let meaningOfLife = false;
+    async function waitForJQuery(){
+        while (true) {
+                if ($ != null){
+                    $("window").off("mouseup")
+                    return
+                }
+                await null; // prevents app from hanging
+        }
+    }
+    waitForJQuery();
     {
         // From https://stackoverflow.com/a/53914092
         class ClassWatcher {
@@ -48,6 +58,7 @@
             }
         }
     
+        var disableChest = false
         function clickFirstButtonByClassName(className) {
             document.getElementsByClassName(className)[0].dispatchEvent(new MouseEvent("click"));
         }
@@ -63,12 +74,17 @@
             else {
                 // Spin
                 clickFirstButtonByClassName("wheel__main--note")
-                clickFirstButtonByClassName("chest")
-                document.getElementsByClassName("widget2").dispatchEvent(new MouseEvent("click"));
+                if (!disableChest) {
+                    clickFirstButtonByClassName("chest")
+                }
+                document.getElementById("widget2").dispatchEvent(new MouseEvent("click"));
             }
         }
         // Close the dialog
         function closeSwal2() {
+            if (document.getElementsByClassName("popup-alert__message")[0].innerHTML == "Đã đạt đến giới hạn Rương đếm ngược hàng ngày") {
+                disableChest = true
+            }
             clickFirstButtonByClassName("swal2-close")
         }
         
