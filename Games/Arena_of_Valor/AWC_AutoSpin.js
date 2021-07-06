@@ -68,6 +68,7 @@ await fetch("https://code.jquery.com/jquery-3.6.0.min.js").then(x => x.text()).t
         for (let i = 0; i < 3; i++) {
             teams[i].dispatchEvent(new MouseEvent("click"));
         }
+        setTimeout(() => jQuery(".ReactModal__Overlay").trigger("click"), 2000)
     }
     // Check for dialog message then close
     function closeSwalDialog() {
@@ -103,7 +104,11 @@ await fetch("https://code.jquery.com/jquery-3.6.0.min.js").then(x => x.text()).t
     }
 
     spin()
-
+    // Disable window change
     jQuery("window").off("mouseup")
     jQuery("document").off("visibilitychange")
+    // Remove video player (so it isnt annoying to me and save CPU by a lot)
+    Array.from(document.getElementsByTagName("iframe")).forEach((iframe) => {
+        iframe.remove()
+    })
 }
