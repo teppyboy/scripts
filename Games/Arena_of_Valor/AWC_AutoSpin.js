@@ -60,7 +60,6 @@ await fetch("https://code.jquery.com/jquery-3.6.0.min.js").then(x => x.text()).t
         if (!disableChest) {
             clickFirstButtonByClassName("chest")
         }
-        document.getElementById("widget2").dispatchEvent(new MouseEvent("click"));
     }
 
     function pickCard() {
@@ -85,6 +84,7 @@ await fetch("https://code.jquery.com/jquery-3.6.0.min.js").then(x => x.text()).t
         else {
             let swal2msg = document.getElementsByClassName("popup-alert__message")
             if (swal2msg.length > 0) {
+                console.log(swal2msg[0].innerHTML)
                 if (swal2msg[0].innerHTML == "Đã đạt đến giới hạn Rương đếm ngược hàng ngày") {
                     disableChest = true
                 }
