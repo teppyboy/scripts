@@ -22,8 +22,6 @@ echo "Setting up Termux shared storage..."
 termux-setup-storage
 echo "Downloading rclone..."
 mkdir -p $RCLONE_PATH
-
-echo "Downloading rclone..."
 wget -O - $RCLONE_URL | gunzip -c > "$RCLONE_PATH/rclone"
 echo "Downloading fusermount..."
 wget -O "$RCLONE_PATH/fusermount" $FUSERMOUNT_URL
