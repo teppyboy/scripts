@@ -1,1 +1,10 @@
+#!/data/data/com.termux/files/usr/bin/bash -e
 
+echo "Original code from https://android.stackexchange.com/questions/225604/how-to-mount-rclone-on-android"
+echo "Entering root shell with rclone available..."
+
+# must be run with root privileges
+[ $(id -u) -eq 0 ] || exec su --mount-master -c "LD_LIBRARY_PATH=$LD_LIBRARY_PATH HOME=$HOME PATH=$PATH:$HOME/.rclone-files/ $0"
+
+# make sure to be in root mount namespace
+[ $(readlink /proc/1/ns/mnt) = $(readlink /proc/self/ns/mnt) ] || nsenter -t 1 -m -- "$0"
