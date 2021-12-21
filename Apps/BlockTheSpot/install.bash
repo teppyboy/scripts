@@ -31,13 +31,17 @@ if ! [ -d "$SPOTIFY" ]; then
 fi
 
 if [ "$1" == "uninstall" ]; then
-    echo "Uninstalling BlockTheSpot..."
-    for v in "${patchfiles[@]}"
-    do
-        rm "$SPOTIFY/$v"
-    done
-    mv "$SPOTIFY/chrome_elf_bak.dll" "$SPOTIFY/chrome_elf.dll"
-    echo "Uninstalling completed."
+    if [ -f "$SPOTIFY/chrome_elf_bak.dll" ]; then
+        echo "Uninstalling BlockTheSpot..."
+        for v in "${patchfiles[@]}"
+        do
+            rm "$SPOTIFY/$v"
+        done
+        mv "$SPOTIFY/chrome_elf_bak.dll" "$SPOTIFY/chrome_elf.dll"
+        echo "Uninstalling completed."
+    else
+        echo "Nothing to uninstall."
+    fi
     exit
 fi
 
