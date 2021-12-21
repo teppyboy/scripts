@@ -37,15 +37,8 @@ echo "Extracting BlockTheSpot..."
 unzip -d chrome_elf chrome_elf.zip
 
 if [ -f "$SPOTIFY/chrome_elf.dll" ]; then
-    read -p "Do you want to backup Spotify files? [Y/n] " -n 1 -r
-    echo    # (optional) move to a new line
-    if [[ $REPLY =~ ^[Yy]$ || -z $REPLY ]]
-    then
-        echo "Backuping files..."
-        mv "$SPOTIFY/chrome_elf.dll" "$SPOTIFY/chrome_elf_bak.dll"
-    else
-        [[ "$0" = "$BASH_SOURCE" ]] && exit 1 || return 1 # handle exits from shell or function but don't exit interactive shell
-    fi
+    echo "Backuping files..."
+    mv "$SPOTIFY/chrome_elf.dll" "$SPOTIFY/chrome_elf_bak.dll"
 fi
 
 WINEPREFIX=$WINEPREFIX wineserver -k
