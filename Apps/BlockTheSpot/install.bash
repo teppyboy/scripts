@@ -30,6 +30,17 @@ if ! [ -d "$SPOTIFY" ]; then
     exit
 fi
 
+if [ "$1" == "uninstall" ]; then
+    echo "Uninstalling BlockTheSpot..."
+    for v in "${patchfiles[@]}"
+    do
+        rm "$SPOTIFY/$v"
+    done
+    mv "$SPOTIFY/chrome_elf_bak.dll" "$SPOTIFY/chrome_elf.dll"
+    echo "Uninstalling completed."
+    exit
+fi
+
 echo "Downloading BlockTheSpot..."
 curl -OL "https://github.com/mrpond/BlockTheSpot/releases/latest/download/chrome_elf.zip"
 
