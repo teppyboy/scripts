@@ -39,7 +39,7 @@ def main():
     ws_scrcpy = subprocess.Popen(["npm", "start"], cwd="./ws-scrcpy", stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     def print_ws_scrcpy():
         for line in ws_scrcpy.stdout:
-            if line.decode("utf-8").strip is None:
+            if line.decode("utf-8").strip() is None:
                 continue
             if "Listening on:" in line.decode("utf-8").strip():
                 device_ip = subprocess.check_output(['ifdata', '-pa', 'wlan0']).decode("utf-8").strip()
