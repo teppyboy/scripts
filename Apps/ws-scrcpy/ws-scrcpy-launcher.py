@@ -121,6 +121,7 @@ def main():
             return
 
     device_ip = get_device_private_ip()
+    wifi_ssid = get_wifi_name()
 
     print("Adb server port:", adb_port)
     print("Device IP:", device_ip)
@@ -142,11 +143,12 @@ def main():
                 continue
             if "Listening on:" in line.decode("utf-8").strip():
                 device_ip = get_device_private_ip()
+                wifi_ssid = get_wifi_name()
                 print("=========================================")
-                print(f"ws-scrcpy started on {device_ip}:8000")
+                print(f"ws-scrcpy started on {device_ip}:8000 on {wifi_ssid}")
                 print("=========================================")
-                show_toast(f"ws-scrcpy: {device_ip}:8000")
-                show_notification(f"ws-scrcpy: {device_ip}:8000", f"Wifi: {get_wifi_name()}, access {device_ip}:8000 in browser to control the device.", [2000, 1000, 500], True)
+                show_toast(f"ws-scrcpy: {device_ip}:8000 on {wifi_ssid}")
+                show_notification(f"ws-scrcpy: {device_ip}:8000", f"Wifi: {wifi_ssid}, access {device_ip}:8000 in browser to control the device.", [2000, 1000, 500], True)
             print("[ws-scrcpy]:", line.decode("utf-8").strip())
     ws_scrcpy_thread = threading.Thread(target=print_ws_scrcpy)
     ws_scrcpy_thread.daemon = True
@@ -157,6 +159,7 @@ def main():
         while True:
             time.sleep(5)
             curr_ip = get_device_private_ip()
+            curr_ssid = get_wifi_name()
             if curr_ip != device_ip:
                 print("Device IP changed, reconnecting adb...")
                 show_notification("Reconnecting adb...", "This may take a while, take a cup of coffee.")
@@ -168,11 +171,18 @@ def main():
                     break
                 device_ip = curr_ip
                 print("=========================================")
-                print(f"ws-scrcpy started on {device_ip}:8000")
+                print(f"ws-scrcpy started on {device_ip}:8000 on {wifi_ssid}")
                 print("=========================================")
-                show_toast(f"ws-scrcpy: {device_ip}:8000")
-                show_notification(f"ws-scrcpy: {device_ip}:8000", f"Wifi: {get_wifi_name()}, access {device_ip}:8000 in browser to control the device.", [2000, 1000, 500], True)
-
+                show_toast(f"ws-scrcpy: {device_ip}:8000 on {wifi_ssid}")
+                show_notification(f"ws-scrcpy: {device_ip}:8000", f"Wifi: {wifi_ssid}, access {device_ip}:8000 in browser to control the device.", [2000, 1000, 500], True)
+            if curr_ssid != wifi_ssid:
+                print("Wifi ssid changed, changing ssid in notification...")
+                wifi_ssid = curr_ssid
+                print("=========================================")
+                print(f"ws-scrcpy started on {device_ip}:8000 on {wifi_ssid}")
+                print("=========================================")
+                show_toast(f"ws-scrcpy: {device_ip}:8000 on {wifi_ssid}")
+                show_notification(f"ws-scrcpy: {device_ip}:8000", f"Wifi: {wifi_ssid}, access {device_ip}:8000 in browser to control the device.", [2000, 1000, 500], True)
     except:
         pass
 
