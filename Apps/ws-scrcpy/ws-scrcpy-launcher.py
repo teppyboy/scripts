@@ -157,7 +157,7 @@ def main():
     print("PLEASE WAIT UNTIL WS-SCRCPY FULLY STARTED (ABOUT 5 MINS), IT TAKES A WHILE TO START THE SERVER.")
     try:
         while True:
-            time.sleep(5)
+            time.sleep(1)
             curr_ip = get_device_private_ip()
             curr_ssid = get_wifi_name()
             if curr_ip != device_ip:
