@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 # Rewrite
 import subprocess
-import os
+import json
 import time
 import threading
 import random
@@ -46,8 +46,16 @@ def show_notification(title, message=None, vibration: list[int] | str=None, soun
         args += ["--ongoing"]
     run(args)
 
+def get_wifi():
+    if not which("termux-wifi-connectioninfo"):
+        raise FileNotFoundError("termux-wifi-connectioninfo not found, please install termux-api package and Termux:API app.")
+    return json.loads(subprocess.check_output(["termux-wifi-connectioninfo"]).decode("utf-8").strip())
+
+def get_wifi_name():
+    return get_wifi()["ssid"]
+
 def get_device_private_ip():
-    return subprocess.check_output(['ifdata', '-pa', 'wlan0']).decode("utf-8").strip()
+    return get_wifi()["ip"]
 
 def get_port_from_process_name(name: str, state: str="LISTEN"):
     lsof_output = subprocess.check_output(["sudo", "lsof", "-i", "-P", "-n"]).decode("utf-8")
@@ -138,21 +146,13 @@ def main():
                 print(f"ws-scrcpy started on {device_ip}:8000")
                 print("=========================================")
                 show_toast(f"ws-scrcpy: {device_ip}:8000")
-                show_notification(f"ws-scrcpy: {device_ip}:8000", f"Access {device_ip}:8000 in browser to control the device.", [2000, 1000, 500], True)
+                show_notification(f"ws-scrcpy: {device_ip}:8000", f"Wifi: {get_wifi_name()}, access {device_ip}:8000 in browser to control the device.", [2000, 1000, 500], True)
             print("[ws-scrcpy]:", line.decode("utf-8").strip())
     ws_scrcpy_thread = threading.Thread(target=print_ws_scrcpy)
     ws_scrcpy_thread.daemon = True
     ws_scrcpy_thread.start()
-    # print("starting scrcpy server on local device...")
-    # scrcpy = subprocess.Popen("adb shell su -c 'CLASSPATH=/data/data/com.termux/files/home/ws-scrcpy/vendor/Genymobile/scrcpy/scrcpy-server.jar app_process / com.genymobile.scrcpy.Server 1.19-ws2 web ERROR 8886'",
-    # shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    # def print_scrcpy():
-    #     for line in scrcpy.stdout:
-    #         print("[scrcpy patch]:", line.decode("utf-8").strip())
-    # scrcpy_thread = threading.Thread(target=print_scrcpy)
-    # scrcpy_thread.daemon = True
-    # scrcpy_thread.start()
-    print("PLEASE WAIT UNTIL WS-SCRCPY FULLY STARTS (ABOUT 5 MINS), IT TAKES A WHILE TO START THE SERVER.")
+
+    print("PLEASE WAIT UNTIL WS-SCRCPY FULLY STARTED (ABOUT 5 MINS), IT TAKES A WHILE TO START THE SERVER.")
     try:
         while True:
             time.sleep(5)
@@ -171,7 +171,7 @@ def main():
                 print(f"ws-scrcpy started on {device_ip}:8000")
                 print("=========================================")
                 show_toast(f"ws-scrcpy: {device_ip}:8000")
-                show_notification(f"ws-scrcpy: {device_ip}:8000", f"Access {device_ip}:8000 in browser to control the device.", [2000, 1000, 500], True)
+                show_notification(f"ws-scrcpy: {device_ip}:8000", f"Wifi: {get_wifi_name()}, access {device_ip}:8000 in browser to control the device.", [2000, 1000, 500], True)
 
     except:
         pass
@@ -186,29 +186,7 @@ def main():
         except subprocess.TimeoutExpired:
             print("ws_scrcpy doesn't exit after 15 seconds, killing process...")
             ws_scrcpy.kill()
-
-    # print("stopping scrcpy server...")
-    # if scrcpy.poll() == None:
-    #     scrcpy.terminate()
-    #     try:
-    #         # if this returns, the process completed
-    #         scrcpy.wait(timeout=15)
-    #     except subprocess.TimeoutExpired:
-    #         print("scrcpy doesn't exit after 15 seconds, killing process...")
-    #         scrcpy.kill()
-
-    # # kill old scrcpy-server to ensure we can start a new one after this.
-    # try:
-    #     lsof_output = subprocess.check_output(["sudo", "lsof", "-i", "-P", "-n"]).decode("utf-8")
-    #     for line in lsof_output.split("\n"):
-    #         if "8886" in line and "(LISTEN)" in line:
-    #             line = ' '.join(line.split())
-    #             print(line.strip())
-    #             pid = line.strip().split(" ")[1]
-    #             subprocess.call(["sudo", "kill", "-9", pid])
-    #             break
-    # except:
-    #     print("failed to stop scrcpy server")
+    
     print("ws-scrcpy has been stopped.")
     show_notification("ws-scrcpy has been stopped.", ongoing=False)
 
