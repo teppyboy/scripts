@@ -1,106 +1,216 @@
 #!/usr/bin/python3
-# poorly written for quick and dirty use
+# Rewrite
 import subprocess
 import os
 import time
 import threading
+import random
+from pathlib import Path
+from shutil import which
+
+APP_UUID="a6db95c2-27db-4b88-a687-c8107d1bc9d6"
+
+def Popen(args: list | str, root=False, shell=False, cwd=Path.cwd()):
+    if root:
+        if shell:
+            args = "sudo " + args
+        else:
+            args = ["sudo"] + args
+    result = subprocess.Popen(args, shell=shell, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    return result
+
+def run(args: list | str, root=False, shell=False, cwd=Path.cwd()):
+    if root:
+        if shell:
+            args = "sudo " + args
+        else:
+            args = ["sudo"] + args
+    result = subprocess.run(args, shell=shell, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    result.check_returncode()
+    return result
+
+def show_toast(message):
+    run(["termux-toast", f'{message}'])
+
+def show_notification(title, message=None, vibration: list[int] | str=None, sound=False, ongoing=True):
+    if not which("termux-notification"):
+        raise FileNotFoundError("termux-notification not found, please install termux-api package and Termux:API app.")
+    args = ["termux-notification", "-i", APP_UUID, "--priority", "max", "-t", f'{title}']
+    if message:
+        args += ["-c", f'{message}']
+    if vibration:
+        args += ["--vibrate", ",".join(str(x) for x in vibration) if isinstance(vibration, list) else vibration]
+    if sound:
+        args += ["--sound"]
+    if ongoing:
+        args += ["--ongoing"]
+    run(args)
+
+def get_device_private_ip():
+    return subprocess.check_output(['ifdata', '-pa', 'wlan0']).decode("utf-8").strip()
+
+def get_port_from_process_name(name: str, state: str="LISTEN"):
+    lsof_output = subprocess.check_output(["sudo", "lsof", "-i", "-P", "-n"]).decode("utf-8")
+    for line in lsof_output.split("\n"):
+        if name in line and f"({state})" in line:
+            line = ' '.join(line.split())
+            return int(line.strip().split(" ")[8].split(":")[1])
+    return None
+
+def get_pid_from_port(port: int, state: str="LISTEN"):
+    lsof_output = subprocess.check_output(["sudo", "lsof", "-i", "-P", "-n"]).decode("utf-8")
+    for line in lsof_output.split("\n"):
+        if str(port) in line and f"({state})" in line:
+            line = ' '.join(line.split())
+            return line.strip().split(" ")[1]
+    return None
+
+def start_adbd():
+    free_port = random.randint(0, 65535)
+    while get_pid_from_port(free_port):
+        free_port = random.randint(0, 65535)
+    print("Starting adbd on port " + str(free_port))
+    show_notification("Starting adbd", "Starting adbd on port " + str(free_port))
+    try:
+        run(["setprop", "service.adb.tcp.port", str(free_port)], root=True)
+    except subprocess.CalledProcessError:
+        print("Failed to set adb port")
+        show_notification("Failed to set adb port to " + str(free_port), "You'll need to start adb manually through Developer Settings")
+        return
+    try:
+        run(["stop", "adbd"], root=True)
+    except subprocess.CalledProcessError:
+        print("Failed to stop adbd, maybe adbd was not running?")
+    try:
+        run(["start", "adbd"], root=True)
+    except subprocess.CalledProcessError:
+        print("Failed to start adbd")
+        show_notification("Failed to start adbd", "You'll need to start adb manually through Developer Settings")
+        return
+    return free_port
+
+def connect_adb(ip, port):
+    run(["adb", "connect", f"{ip}:{port}"])
 
 def main():
-    print("ws-scrcpy launcher for termux (YOU NEED TO HAVE WS-SCRCPY INSTALLED IN ~/ws-scrcpy)")
-    print("THIS SCRIPT REQUIRES ROOT AND TSU, THANK YOU :(")
-    print("checking for adb port...")
-    adb_lsof_output = subprocess.check_output(["sudo", "lsof", "-i", "-P", "-n"]).decode("utf-8")
+    print("ws-scrcpy launcher for Termux")
+    print("Checking for ws-scrcpy...")
+    if not Path("./ws-scrcpy").exists():
+        print("ws-scrcpy not found, please install ws-scrcpy.")
+        return
+    print("Checking for current adb port...")
+    show_notification("Checking for current adb port...")
     adb_port = None
     try:
-        for line in adb_lsof_output.split("\n"):
-            if "adbd" in line and "(LISTEN)" in line:
-                line = ' '.join(line.split())
-                print(line.strip())
-                adb_port = line.strip().split(" ")[8].split(":")[1]
-                break
+        adb_port = get_port_from_process_name("adbd")
     except:
-        print("error occured while getting adb port.")
         pass
-    if adb_port == None:
-        adb_port = input("couldn't find adb port please type manually:")
+    if adb_port is None:
+        print("Failed to get adb port, starting new adbd...")
+        adb_port = start_adbd()
+        if adb_port is None:
+            print("Failed to start adbd...")
+            return
 
-    device_ip = subprocess.check_output(['ifdata', '-pa', 'wlan0']).decode("utf-8").strip()
+    device_ip = get_device_private_ip()
 
-    print("adb port:", adb_port)
-    print("ip:", device_ip)
-    print("connecting to device through adb...")
-    connect_result = subprocess.call(["adb", "connect", f"{device_ip}:{adb_port}"])
-    if connect_result != 0:
-        print("connection failed.")
-        exit()
-    print("changing directory to home")
-    os.chdir("/data/data/com.termux/files/home/")
-    print("starting ws-scrcpy server...")
-    ws_scrcpy = subprocess.Popen(["npm", "start"], cwd="./ws-scrcpy", stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    print("Adb server port:", adb_port)
+    print("Device IP:", device_ip)
+    print("Connecting to device through adb...")
+    show_notification("Connecting to device through adb...")
+    try:
+        connect_adb(device_ip, adb_port)
+    except subprocess.CalledProcessError:
+        print("Failed to connect to device through adb")
+        show_notification("Failed to connect to device through adb", "You'll need to connect manually in Termux.")
+        return
+
+    print("Starting ws-scrcpy server...")
+    show_notification("Starting ws-scrcpy server...", "You may need to wait for 5 minutes for ws-scrcpy to start.")
+    ws_scrcpy = Popen(["npm", "start"], cwd="./ws-scrcpy")
     def print_ws_scrcpy():
         for line in ws_scrcpy.stdout:
-            if line.decode("utf-8").strip() is None:
+            if line.decode("utf-8").strip() == None:
                 continue
             if "Listening on:" in line.decode("utf-8").strip():
-                device_ip = subprocess.check_output(['ifdata', '-pa', 'wlan0']).decode("utf-8").strip()
+                device_ip = get_device_private_ip()
                 print("=========================================")
-                print(f"ws-scrcpy STARTED ON {device_ip}:8000")
+                print(f"ws-scrcpy started on {device_ip}:8000")
                 print("=========================================")
+                show_toast(f"ws-scrcpy: {device_ip}:8000")
+                show_notification(f"ws-scrcpy: {device_ip}:8000", f"Access {device_ip}:8000 in browser to control the device.", [2000, 1000, 500], True)
             print("[ws-scrcpy]:", line.decode("utf-8").strip())
     ws_scrcpy_thread = threading.Thread(target=print_ws_scrcpy)
     ws_scrcpy_thread.daemon = True
     ws_scrcpy_thread.start()
-    print("starting scrcpy server on local device...")
-    scrcpy = subprocess.Popen("adb shell su -c 'CLASSPATH=/data/data/com.termux/files/home/ws-scrcpy/vendor/Genymobile/scrcpy/scrcpy-server.jar app_process / com.genymobile.scrcpy.Server 1.19-ws2 web ERROR 8886'",
-    shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    def print_scrcpy():
-        for line in scrcpy.stdout:
-            print("[scrcpy patch]:", line.decode("utf-8").strip())
-    scrcpy_thread = threading.Thread(target=print_scrcpy)
-    scrcpy_thread.daemon = True
-    scrcpy_thread.start()
+    # print("starting scrcpy server on local device...")
+    # scrcpy = subprocess.Popen("adb shell su -c 'CLASSPATH=/data/data/com.termux/files/home/ws-scrcpy/vendor/Genymobile/scrcpy/scrcpy-server.jar app_process / com.genymobile.scrcpy.Server 1.19-ws2 web ERROR 8886'",
+    # shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    # def print_scrcpy():
+    #     for line in scrcpy.stdout:
+    #         print("[scrcpy patch]:", line.decode("utf-8").strip())
+    # scrcpy_thread = threading.Thread(target=print_scrcpy)
+    # scrcpy_thread.daemon = True
+    # scrcpy_thread.start()
     print("PLEASE WAIT UNTIL WS-SCRCPY FULLY STARTS (ABOUT 5 MINS), IT TAKES A WHILE TO START THE SERVER.")
     try:
         while True:
             time.sleep(5)
-            curr_ip = subprocess.check_output(['ifdata', '-pa', 'wlan0']).decode("utf-8").strip()
+            curr_ip = get_device_private_ip()
             if curr_ip != device_ip:
-                print("!!!DEVICE IP ADDRESS CHANGED, PLEASE RESTART SERVER MANUALLY!!!")
-                print("!!!SCRCPY WILL NOT WORK UNTIL YOU RESTART THE SERVER!!!")
-    except: #  lazy
-        if ws_scrcpy.poll() == None:
-            print("stopping ws-scrcpy server...")
-            ws_scrcpy.terminate()
-            try:
-                # if this returns, the process completed
-                ws_scrcpy.wait(timeout=15)
-            except subprocess.TimeoutExpired:
-                print("ws_scrcpy doesn't exit after 15 seconds, killing process...")
-                ws_scrcpy.kill()
-
-        print("stopping scrcpy server...")
-        if scrcpy.poll() == None:
-            scrcpy.terminate()
-            try:
-                # if this returns, the process completed
-                scrcpy.wait(timeout=15)
-            except subprocess.TimeoutExpired:
-                print("scrcpy doesn't exit after 15 seconds, killing process...")
-                scrcpy.kill()
-
-        # kill old scrcpy-server to ensure we can start a new one after this.
-        try:
-            lsof_output = subprocess.check_output(["sudo", "lsof", "-i", "-P", "-n"]).decode("utf-8")
-            for line in lsof_output.split("\n"):
-                if "8886" in line and "(LISTEN)" in line:
-                    line = ' '.join(line.split())
-                    print(line.strip())
-                    pid = line.strip().split(" ")[1]
-                    subprocess.call(["sudo", "kill", "-9", pid])
+                print("Device IP changed, reconnecting adb...")
+                show_notification("Reconnecting adb...", "This may take a while, take a cup of coffee.")
+                try:
+                    connect_adb(curr_ip, adb_port)
+                except subprocess.CalledProcessError:
+                    print("Failed to connect to device through adb")
+                    show_notification("Failed to connect to device through adb", "ws-scrcpy will be stopped.")
                     break
-        except:
-            print("failed to stop scrcpy server")
-        print("stopped.")
+                device_ip = curr_ip
+                print("=========================================")
+                print(f"ws-scrcpy started on {device_ip}:8000")
+                print("=========================================")
+                show_toast(f"ws-scrcpy: {device_ip}:8000")
+                show_notification(f"ws-scrcpy: {device_ip}:8000", f"Access {device_ip}:8000 in browser to control the device.", [2000, 1000, 500], True)
+
+    except:
+        pass
+
+    if ws_scrcpy.poll() == None:
+        print("Stopping ws-scrcpy server...")
+        show_notification("Stopping ws-scrcpy server...")
+        ws_scrcpy.terminate()
+        try:
+            # if this returns, the process completed
+            ws_scrcpy.wait(timeout=15)
+        except subprocess.TimeoutExpired:
+            print("ws_scrcpy doesn't exit after 15 seconds, killing process...")
+            ws_scrcpy.kill()
+
+    # print("stopping scrcpy server...")
+    # if scrcpy.poll() == None:
+    #     scrcpy.terminate()
+    #     try:
+    #         # if this returns, the process completed
+    #         scrcpy.wait(timeout=15)
+    #     except subprocess.TimeoutExpired:
+    #         print("scrcpy doesn't exit after 15 seconds, killing process...")
+    #         scrcpy.kill()
+
+    # # kill old scrcpy-server to ensure we can start a new one after this.
+    # try:
+    #     lsof_output = subprocess.check_output(["sudo", "lsof", "-i", "-P", "-n"]).decode("utf-8")
+    #     for line in lsof_output.split("\n"):
+    #         if "8886" in line and "(LISTEN)" in line:
+    #             line = ' '.join(line.split())
+    #             print(line.strip())
+    #             pid = line.strip().split(" ")[1]
+    #             subprocess.call(["sudo", "kill", "-9", pid])
+    #             break
+    # except:
+    #     print("failed to stop scrcpy server")
+    print("ws-scrcpy has been stopped.")
+    show_notification("ws-scrcpy has been stopped.", ongoing=False)
 
 if __name__ == '__main__':
     main()
