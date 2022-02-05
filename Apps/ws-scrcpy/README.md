@@ -6,6 +6,7 @@
 
 + **YOU NEED TO HAVE WS-SCRCPY INSTALLED, ALONG WITH ROOT ACCESS AND DEPENDENCIES**
 + ~~YOU ALSO NEED TO OPEN ADB WIRELESS IN DEVELOPER SETTINGS FOR THIS TO WORK~~ (The script can use `su` to start ADB wireless now)
++ You need to grant Termux:API full Location permission and set to "Always" (Foreground mode will not work correctly)
 + Rootless mode is available, although it **will not** work in most cases.
 + Dependencies: `root-repo` `tsu` `moreutils` `build-essential` `nodejs` `python3` `android-tools` `git` `termux-api`
 
