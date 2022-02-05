@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 # Rewrite
+import sys
 import subprocess
 import json
 import time
@@ -32,7 +33,7 @@ def run(args: list | str, root=False, shell=False, cwd=Path.cwd()):
 def show_toast(message):
     run(["termux-toast", f'{message}'])
 
-def show_notification(title, message=None, vibration: list[int] | str=None, sound=False, ongoing=True):
+def show_notification(title, message=None, vibration: list[int] | str=None, sound=False, ongoing=True, buttons: list[dict] = None):
     if not which("termux-notification"):
         raise FileNotFoundError("termux-notification not found, please install termux-api package and Termux:API app.")
     args = ["termux-notification", "-i", APP_UUID, "--priority", "max", "-t", f'{title}']
@@ -44,6 +45,14 @@ def show_notification(title, message=None, vibration: list[int] | str=None, soun
         args += ["--sound"]
     if ongoing:
         args += ["--ongoing"]
+    if buttons:
+        count = 1
+        for btn in buttons:
+            args += [f"--button{count}", f'{btn["label"]}', f"--button{count}-action", f'{btn["action"]}']
+            if count >= 3:
+                break
+            count += 1
+
     run(args)
 
 def get_wifi():
@@ -55,6 +64,7 @@ def get_wifi_name():
     return get_wifi()["ssid"]
 
 def get_device_private_ip():
+    # We don't use info from get_wifi() because Termux:API may not work if user doesn't grant it all permissions.
     return subprocess.check_output(['ifdata', '-pa', 'wlan0']).decode("utf-8").strip()
 
 def get_port_from_process_name(name: str, state: str="LISTEN"):
@@ -83,7 +93,7 @@ def start_adbd():
         run(["setprop", "service.adb.tcp.port", str(free_port)], root=True)
     except subprocess.CalledProcessError:
         print("Failed to set adb port")
-        show_notification("Failed to set adb port to " + str(free_port), "You'll need to start adb manually through Developer Settings")
+        show_notification("Failed to set adb port to " + str(free_port), "You'll need to start adb manually through Developer Settings", ongoing=False)
         return
     try:
         run(["stop", "adbd"], root=True)
@@ -93,7 +103,7 @@ def start_adbd():
         run(["start", "adbd"], root=True)
     except subprocess.CalledProcessError:
         print("Failed to start adbd")
-        show_notification("Failed to start adbd", "You'll need to start adb manually through Developer Settings")
+        show_notification("Failed to start adbd", "You'll need to start adb manually through Developer Settings", ongoing=False)
         return
     return free_port
 
@@ -126,12 +136,12 @@ def main():
     print("Adb server port:", adb_port)
     print("Device IP:", device_ip)
     print("Connecting to device through adb...")
-    show_notification("Connecting to device through adb...")
+    show_notification("Connecting to device through adb...", "This may take a while...")
     try:
         connect_adb(device_ip, adb_port)
     except subprocess.CalledProcessError:
         print("Failed to connect to device through adb")
-        show_notification("Failed to connect to device through adb", "You'll need to connect manually in Termux.")
+        show_notification("Failed to connect to device through adb", "You'll need to connect manually in Termux.", ongoing=False)
         return
 
     print("Starting ws-scrcpy server...")
@@ -148,7 +158,19 @@ def main():
                 print(f"ws-scrcpy started on {device_ip}:8000 on {wifi_ssid}")
                 print("=========================================")
                 show_toast(f"ws-scrcpy: {device_ip}:8000 on {wifi_ssid}")
-                show_notification(f"ws-scrcpy: {device_ip}:8000", f"Wifi: {wifi_ssid}, access {device_ip}:8000 in browser to control the device.", [2000, 1000, 500], True)
+                show_notification(f"ws-scrcpy: {device_ip}:8000", 
+                f"Wifi: {wifi_ssid}, access {device_ip}:8000 in browser to control the device.", 
+                [2000, 1000, 500], True,
+                buttons = [
+                    {
+                        "label": "Open in browser",
+                        "action": f"termux-open-url http://{device_ip}:8000"
+                    },
+                    {
+                        "label": "Stop",
+                        "action": f"kill -15 {ws_scrcpy.pid}"
+                    }
+                ])
             print("[ws-scrcpy]:", line.decode("utf-8").strip())
     ws_scrcpy_thread = threading.Thread(target=print_ws_scrcpy)
     ws_scrcpy_thread.daemon = True
@@ -156,7 +178,7 @@ def main():
 
     print("PLEASE WAIT UNTIL WS-SCRCPY FULLY STARTS (ABOUT 5 MINS), IT TAKES A WHILE TO START THE SERVER.")
     try:
-        while True:
+        while True and ws_scrcpy.poll() is None:
             time.sleep(2.5)
             curr_ip = get_device_private_ip()
             # print("ip:", curr_ip)
@@ -176,7 +198,19 @@ def main():
                 print(f"ws-scrcpy IP changed to {device_ip}:8000 on {wifi_ssid}")
                 print("=========================================")
                 show_toast(f"ws-scrcpy: {device_ip}:8000 on {wifi_ssid}")
-                show_notification(f"ws-scrcpy: {device_ip}:8000", f"Wifi: {wifi_ssid}, access {device_ip}:8000 in browser to control the device.", [2000, 1000, 500], True)
+                show_notification(f"ws-scrcpy: {device_ip}:8000", 
+                f"Wifi: {wifi_ssid}, access {device_ip}:8000 in browser to control the device.", 
+                [2000, 1000, 500], True,
+                buttons = [
+                    {
+                        "label": "Open in browser",
+                        "action": f"termux-open-url http://{device_ip}:8000"
+                    },
+                    {
+                        "label": "Stop",
+                        "action": f"kill -15 {ws_scrcpy.pid}"
+                    }
+                ])
             if curr_ssid != wifi_ssid and curr_ssid not in "<unknown ssid>":  # Do not set current ssid to unknown ssid.
                 print("Wifi ssid changed, changing ssid in notification...")
                 wifi_ssid = curr_ssid
@@ -184,7 +218,18 @@ def main():
                 print(f"ws-scrcpy IP changed to {device_ip}:8000 on {wifi_ssid}")
                 print("=========================================")
                 show_toast(f"ws-scrcpy: {device_ip}:8000 on {wifi_ssid}")
-                show_notification(f"ws-scrcpy: {device_ip}:8000", f"Wifi: {wifi_ssid}, access {device_ip}:8000 in browser to control the device.")
+                show_notification(f"ws-scrcpy: {device_ip}:8000", 
+                f"Wifi: {wifi_ssid}, access {device_ip}:8000 in browser to control the device.",
+                buttons = [
+                    {
+                        "label": "Open in browser",
+                        "action": f"termux-open-url http://{device_ip}:8000"
+                    },
+                    {
+                        "label": "Stop",
+                        "action": f"kill -15 {ws_scrcpy.pid}"
+                    }
+                ])
     except:
         pass
 
@@ -200,7 +245,12 @@ def main():
             ws_scrcpy.kill()
 
     print("ws-scrcpy has been stopped.")
-    show_notification("ws-scrcpy has been stopped.", ongoing=False)
+    show_notification("ws-scrcpy has been stopped.", "You may start again by clicking the restart button.", buttons=[
+        {
+            "label": "Restart",
+            "action": f"{sys.executable} {__file__}",
+        }
+    ], ongoing=False)
 
 if __name__ == '__main__':
     main()
