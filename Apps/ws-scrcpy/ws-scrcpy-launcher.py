@@ -49,7 +49,7 @@ def show_notification(title, message=None, vibration: list[int] | str=None, soun
 def get_wifi():
     if not which("termux-wifi-connectioninfo"):
         raise FileNotFoundError("termux-wifi-connectioninfo not found, please install termux-api package and Termux:API app.")
-    return json.loads(subprocess.check_output(["termux-wifi-connectioninfo"]).decode("utf-8").strip())
+    return json.loads(subprocess.check_output(["termux-wifi-connectioninfo"]).decode("utf-8"))
 
 def get_wifi_name():
     return get_wifi()["ssid"]
@@ -157,9 +157,11 @@ def main():
     print("PLEASE WAIT UNTIL WS-SCRCPY FULLY STARTED (ABOUT 5 MINS), IT TAKES A WHILE TO START THE SERVER.")
     try:
         while True:
-            time.sleep(1)
+            time.sleep(2.5)
             curr_ip = get_device_private_ip()
+            # print("ip:", curr_ip)
             curr_ssid = get_wifi_name()
+            # print("ssid:", curr_ssid)
             if curr_ip != device_ip:
                 print("Device IP changed, reconnecting adb...")
                 show_notification("Reconnecting adb...", "This may take a while, take a cup of coffee.")
@@ -171,18 +173,18 @@ def main():
                     break
                 device_ip = curr_ip
                 print("=========================================")
-                print(f"ws-scrcpy started on {device_ip}:8000 on {wifi_ssid}")
+                print(f"ws-scrcpy IP changed to {device_ip}:8000 on {wifi_ssid}")
                 print("=========================================")
                 show_toast(f"ws-scrcpy: {device_ip}:8000 on {wifi_ssid}")
                 show_notification(f"ws-scrcpy: {device_ip}:8000", f"Wifi: {wifi_ssid}, access {device_ip}:8000 in browser to control the device.", [2000, 1000, 500], True)
-            if curr_ssid != wifi_ssid:
+            if curr_ssid != wifi_ssid and curr_ssid not in "<unknown ssid>":  # Do not set current ssid to unknown ssid.
                 print("Wifi ssid changed, changing ssid in notification...")
                 wifi_ssid = curr_ssid
                 print("=========================================")
-                print(f"ws-scrcpy started on {device_ip}:8000 on {wifi_ssid}")
+                print(f"ws-scrcpy IP changed to {device_ip}:8000 on {wifi_ssid}")
                 print("=========================================")
                 show_toast(f"ws-scrcpy: {device_ip}:8000 on {wifi_ssid}")
-                show_notification(f"ws-scrcpy: {device_ip}:8000", f"Wifi: {wifi_ssid}, access {device_ip}:8000 in browser to control the device.", [2000, 1000, 500], True)
+                show_notification(f"ws-scrcpy: {device_ip}:8000", f"Wifi: {wifi_ssid}, access {device_ip}:8000 in browser to control the device.")
     except:
         pass
 
