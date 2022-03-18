@@ -3,11 +3,12 @@
 // @namespace   tretrauit-dev
 // @match       https://www.youtube.com/shorts/*
 // @grant       none
-// @version     1.0
+// @version     1.1
 // @author      tretrauit
 // @description 22:36:53, 18/3/2022
 // @homepageURL https://gitlab.com/tretrauit/scripts
 // @supportURL  https://gitlab.com/tretrauit/scripts/-/issues
+// @downloadURL https://gitlab.com/tretrauit/scripts/-/raw/main/userscripts/yt-noshorts.user.js
 // @noframes
 // ==/UserScript==
 
