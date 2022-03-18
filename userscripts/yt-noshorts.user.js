@@ -4,8 +4,9 @@
 // @namespace   tretrauit-dev
 // @match       *://*.youtube.com/*
 // @exclude-match`*://music.youtube.com/*
+// @icon        https://upload.wikimedia.org/wikipedia/commons/f/fc/Youtube_shorts_icon.svg
 // @grant       none
-// @version     1.2
+// @version     1.2.1
 // @author      tretrauit
 // @description 22:36:53, 18/3/2022
 // @require     https://raw.githubusercontent.com/naugtur/insertionQuery/master/insQ.min.js
