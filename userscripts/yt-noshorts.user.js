@@ -1,9 +1,11 @@
 // ==UserScript==
 // @name        NoShorts for YouTube
+// @description Redirects Shorts to normal video webpage
 // @namespace   tretrauit-dev
-// @match       https://www.youtube.com/shorts/*
+// @match       *://*.youtube.com/shorts/*
+// @exclude-match`*://music.youtube.com/*
 // @grant       none
-// @version     1.1
+// @version     1.1.1
 // @author      tretrauit
 // @description 22:36:53, 18/3/2022
 // @homepageURL https://gitlab.com/tretrauit/scripts
