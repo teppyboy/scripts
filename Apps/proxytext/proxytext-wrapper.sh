@@ -24,12 +24,12 @@ function proot_install_proxytext () {
 function proot_launch_proxytext () {
     echo "Launching proxytext."
     cd proxytext
+    git pull
     PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium yarn start
-    exit
 }
 
 function install_dependencies () {
-    echo "Checking dependencies..."
+    echo "Checking dependencies."
     declare -a dependencies=("proot-distro")
     for i in "${dependencies[@]}"
     do
@@ -41,13 +41,13 @@ function install_dependencies () {
 }
 
 function install_dependencies_debian () {
-    echo "Installing dependencies in Debian proot..."
+    echo "Installing dependencies in Debian proot."
     proot-distro login debian --termux-home -- bash ./proxytext-wrapper.sh --proot --install-dependencies
     echo "Done."
 }
 
 function install_debian() {
-    echo "Installing debian..."
+    echo "Installing Debian proot."
     proot-distro install debian
 }
 
@@ -84,5 +84,4 @@ install_dependencies
 install_debian
 install_dependencies_debian
 [ ! -d "./proxytext" ] && install_proxytext
-echo "Installation completed."
 start_proxytext
