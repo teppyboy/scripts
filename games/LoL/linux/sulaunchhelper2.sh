@@ -18,7 +18,7 @@ else
     sh "${own_dir}/${SCC_SH}"
 fi
 
-
+echo "Trying to check for Frida kernel argument..."
 if [ "$(cat /proc/sys/kernel/yama/ptrace_scope)" -ne 0 ]; then
     once="Change setting until next reboot"
     persist="Change setting and persist after reboot"
