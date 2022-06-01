@@ -2,7 +2,7 @@
 ## `sulaunchhelper2.sh`
 This script is a wrapper for `sulaunchhelper2.py` for use with Lutris pre-game launch script.
 ### Installation
-> This script no longer wrap `syscall_check.sh`, if you need to execute that script alongside this one, I recommend you to take a look at [preloader.sh](./README.md)
+> This script no longer wrap `syscall_check.sh`, if you need to execute that script alongside this one, I recommend you to take a look at [preloader.sh](./apps/Lutris#preloadersh)
 
 + To install you must have `sulaunchhelper2.py` present, if not you can execute these to quickly download them (to current directory):
 ```sh
@@ -23,7 +23,7 @@ chmod +x sulaunchhelper2.sh
 ## `garena_wrapper.sh`
 This script automates the launching of [lol.py](https://github.com/nhubaotruong/league-of-legends-linux-garena-script) (LoL in Garena client) so you don't have to manually do it ;)
 ### Installation
-> This script no longer wrap `syscall_check.sh`, if you need to execute that script alongside this one, I recommend you to take a look at [preloader.sh](./README.md)
+> This script no longer wrap `syscall_check.sh`, if you need to execute that script alongside this one, I recommend you to take a look at [preloader.sh](./apps/Lutris#preloadersh)
 
 You need to follow steps in `lol.py` repository to properly config your LoL prefix.
 + To install you must have `lol.py` present, if not you can execute these to quickly download them (to current directory):
