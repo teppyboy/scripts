@@ -23,7 +23,8 @@ chmod +x sulaunchhelper2.sh
 ## `garena_wrapper.sh`
 This script automates the launching of [lol.py](https://github.com/nhubaotruong/league-of-legends-linux-garena-script) (LoL in Garena client) so you don't have to manually do it ;)
 ### Installation
-> This script no longer wrap `syscall_check.sh`, if you need to execute that script alongside this one, I recommend you to take a look at [preloader.sh](../../../apps/Lutris#preloadersh)
+> This script no longer wrap `syscall_check.sh`, if you need to execute that script alongside this one, I recommend you to take a look at [`preloader.sh`](../../../apps/Lutris#preloadersh)
+If you do plan to use `preloader.sh` then I **highly recommend you** to **disable logging**, because **lol.py and `preloader.sh` will log your token to ./preloader/preloader_garena_wrapper.sh.log if you keep it enabled**, hence your account may get compromised.
 
 You need to follow steps in `lol.py` repository to properly config your LoL prefix.
 + To install you must have `lol.py` present, if not you can execute these to quickly download them (to current directory):
@@ -42,3 +43,7 @@ chmod +x garena_wrapper.sh
     - Enable **Disable Lutris Runtime**
 > Failure to do above steps will result in Zenity can't show necessary messages dialog so LoL UI may not launch properly (it'll still launch if you use `sulaunchhelper2.sh` and have installed it correctly).
 + Enjoy your Garena LoL experience :P
+
+## [`discord_rpc.sh`](../../../apps/Lutris#discord_rpcsh)
++ This script will bridge Discord RPC from LoL prefix to your linux Discord.
++ Click on the script name to get more info & installation.
