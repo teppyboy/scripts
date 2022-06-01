@@ -46,4 +46,9 @@ chmod +x garena_wrapper.sh
 
 ## [`discord_rpc.sh`](../../../apps/Lutris#discord_rpcsh)
 + This script will bridge Discord RPC from LoL prefix to your linux Discord.
-+ Click on the script name to get more info & installation.
+> Note: The script in current directory [`discord_rpc.sh`](./discord_rpc.sh) is modified from the script mentioned above to work properly with `sulaunchhelper2.sh`,
+the installation is the same **except** when installing the script itself, execute this instead:
+```sh
+curl -OL https://gitlab.com/tretrauit/scripts/-/raw/main/games/LoL/linux/discord_rpc.sh
+chmod +x discord_rpc.sh
+```
