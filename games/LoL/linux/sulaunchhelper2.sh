@@ -3,7 +3,6 @@
 # Because this is for Lutris pre-launch script, you're required to have both sulaunchhelper2.py and syscall_check.sh
 # present in the game' wineprefix
 
-SCC_SH='syscall_check.sh'
 SULH_PY='sulaunchhelper2.py'
 
 dialog() {
@@ -11,12 +10,6 @@ dialog() {
 }
 
 own_dir="$(realpath .)"
-# try to call syscall_check.sh
-if ! [ -x "${own_dir}/${SCC_SH}" ]; then
-    dialog "Please place this script into the same directory as '${SCC_SH}'!"
-else
-    sh "${own_dir}/${SCC_SH}"
-fi
 
 echo "Trying to check for Frida kernel argument..."
 if [ "$(cat /proc/sys/kernel/yama/ptrace_scope)" -ne 0 ]; then

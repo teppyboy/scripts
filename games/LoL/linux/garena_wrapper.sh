@@ -3,21 +3,9 @@
 # It automatically execute lol.py to start LoL lutris game from Garena.
 # You need lol.py and syscall_check.sh present in game prefix root directory.
 
-SCC_SH='syscall_check.sh'
 LOL_PY='lol.py'
 
-dialog() {
-    zenity "$@" --icon-name='lutris' --width="400" --title="Garena LoL to LoL lutris wrapper"
-}
-
 own_dir="$(realpath .)"
-# try to call syscall_check.sh
-if ! [ -x "${own_dir}/${SCC_SH}" ]; then
-    dialog "Please place this script into the same directory as '${SCC_SH}'!"
-else
-    sh "${own_dir}/${SCC_SH}"
-fi
-
 echo "Waiting for Garena to start..."
 until _=$(pidof Garena.exe)
 do
