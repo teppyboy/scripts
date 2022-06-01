@@ -17,10 +17,18 @@ chmod +x preloader.sh
 + Enjoy :L
 
 ## `discord_rpc.sh`
-Launch winediscordrpcbridge.exe, to be able to get Discord Rich Presence on Wine applications on the specified prefix.
+Launch `winediscordrpcbridge.exe`, to be able to get Discord Rich Presence on Wine applications on the specified prefix.
 
 ### Installation
-+ To download `discord_rpc.sh` itself:
++ To install you must have `winediscordrpcbridge.exe` present, if not you can download latest version by executing
+```sh
+curl -OL https://github.com/0e4ef622/wine-discord-ipc-bridge/releases/latest/download/winediscordipcbridge.exe
+```
+or use my build (latest commit: `master/9d56418`)
+```sh
+curl -OL https://github.com/teppyboy/releases/releases/download/git%2B0e4ef622%2Fwine-discord-ipc-bridge%2Bmaster%2F9d56418/winediscordipcbridge.exe
+```
++ Then to download `discord_rpc.sh` itself:
 ```sh
 curl -OL https://gitlab.com/tretrauit/scripts/-/raw/main/apps/Lutris/discord_rpc.sh
 chmod +x discord_rpc.sh
