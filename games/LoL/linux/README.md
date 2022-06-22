@@ -30,7 +30,7 @@ You need to follow steps in `lol.py` repository to properly config your LoL pref
 + To install you must have `lol.py` present, if not you can execute these to quickly download them (to current directory):
 ```sh
 curl -OL https://raw.githubusercontent.com/nhubaotruong/league-of-legends-linux-garena-script/main/lol.py
-chmod +x sulaunchhelper2.py
+chmod +x lol.py
 ```
 + Then to download `garena_wrapper.sh` itself:
 ```sh
