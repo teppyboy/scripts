@@ -44,4 +44,7 @@ if [ "$(cat /proc/sys/kernel/yama/ptrace_scope)" -ne 0 ]; then
     fi
 fi
 
+sleep 5
+
+echo "Launching sulaunchhelper2.py"
 python3 "${own_dir}/${SULH_PY}"
