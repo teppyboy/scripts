@@ -36,6 +36,7 @@ cd ~
 git clone https://github.com/NetrisTV/ws-scrcpy
 cd ./ws-scrcpy
 npm install
+cd ..
 curl -OL https://gitlab.com/tretrauit/scripts/-/raw/main/Apps/ws-scrcpy/ws-scrcpy-launcher.py
 chmod +x ws-scrcpy-launcher.py
 ```
