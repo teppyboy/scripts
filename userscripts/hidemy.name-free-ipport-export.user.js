@@ -9,7 +9,7 @@
 // @run-at      document-idle
 // @homepageURL https://gitlab.com/tretrauit/scripts
 // @supportURL  https://gitlab.com/tretrauit/scripts/-/issues
-// @downloadURL https://gitlab.com/tretrauit/scripts/-/raw/main/userscripts/hidemy.name-free-ipport-export.user.js.user.js
+// @downloadURL https://gitlab.com/tretrauit/scripts/-/raw/main/userscripts/hidemy.name-free-ipport-export.user.js
 // ==/UserScript==
 
 setTimeout(function() {

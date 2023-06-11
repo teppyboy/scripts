@@ -32,6 +32,9 @@ function findElement(tag, properties) {
 }
 
 function getAncestor(element, level) {
+    if (element == null) {
+        return null;
+    }
     for (let i = 0; i < level; i++) {
         element = element.parentNode;
     }
@@ -39,26 +42,39 @@ function getAncestor(element, level) {
 }
 
 console.log("Scanning class for components...");
+// Search box
 let searchBox = findElement("input", {"aria-autocomplete": "list"});
-if (searchBox != null) {
-    searchBox = getAncestor(searchBox, 7);
+if (searchBox == null) {
+    console.warn("Failed to get searchBox element.");
+    throw new Error();
 }
-let textHeader = findElement("span", {"style": "line-height: 28px;"});
+searchBox = getAncestor(searchBox, 7);
+// Header & Text header
+let textHeader = findElement("span", {"style": "line-height: var(--base-line-clamp-line-height); --base-line-clamp-line-height:28px;"});
 let header;
-if (textHeader != null) {
-    header = getAncestor(textHeader, 7);
-    textHeader = textHeader.childNodes[0];
+if (textHeader == null) {
+    console.warn("Failed to get textHeader element.");
+    throw new Error();
 }
+header = getAncestor(textHeader, 7);
+textHeader = textHeader.childNodes[0];
+// Unread indicator
 let unreadIndicator = findElement("span", {"data-visualcompletion": "ignore"});
+// Action bar
 let actionBar = findElement("div", {"aria-expanded": "false"});
-if (actionBar != null) {
-    actionBar = actionBar.parentNode;
+if (actionBar == null) {
+    console.warn("Failed to get actionBar element.");
+    throw new Error();
 }
+actionBar = actionBar.parentNode;
+// Chats
 let chats = findElement("div", {"aria-label": "Chats"});
-if (chats != null) {
-    chats = chats.parentNode;
+if (chats == null) {
+    console.warn("Failed to get chats element.");
+    throw new Error();
 }
-
+chats = chats.parentNode;
+// Print elements
 console.log("Search box:", searchBox);
 console.log("Header:", header);
 console.log("Text header:", textHeader);
