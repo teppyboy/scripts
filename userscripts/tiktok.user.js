@@ -13,7 +13,7 @@
 // ==/UserScript==
 
 // Remove the "download app ads"
-const dlClasses = ["tiktok-9er52i-DivCtaGuideWrapper", "tiktok-99ed1t-DivFooterGuide", "tiktok-txik7e-DivFloatButtonWrapper"]
+const dlClasses = ["tiktok-9er52i-DivCtaGuideWrapper", "tiktok-99ed1t-DivFooterGuide", "tiktok-txik7e-DivFloatButtonWrapper", "tiktok-h0mxry-DivCtaContentWrapper"]
 setInterval(() => {
     for (const dlClass of dlClasses) {
         const element = document.getElementsByClassName(dlClass)[0]
